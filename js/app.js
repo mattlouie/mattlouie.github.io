@@ -81,13 +81,18 @@ class Hero {
   // Added collision and function to reset hero after collission
   update() {
     for (let enemy of allEnemies) {
-      if (this.y === enemy.y && (enemy.x + enemy.step/2 > this.x && enemy.x < this.x + this.step/2)) {
+      if (this.y === enemy.y &&
+        this.x < enemy.x + 83 &&
+        this.x + 83 > enemy.x &&
+        this.y < enemy.y + 101 &&
+        101 + this.y > enemy.y) {
         this.reset();
       }
     } if (this.y < 0) {
       this.victory = true;
     }
   }
+
   // Added reset function which resets hero when colliding with enemy
   reset() {
     this.y = this.startY;
