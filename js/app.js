@@ -5,6 +5,8 @@ var Enemy = function(x, y, speed) {
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
+    // Offset enemy so that it appears in middle of tiles
+    // Added reset to enemy
     this.x = x;
     this.y = y + 55;
     this.step = 101;
@@ -35,7 +37,7 @@ Enemy.prototype.render = function() {
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-
+// Create hero so that he moves a tile at a time and he appears center of tile
 class Hero {
   constructor () {
     this.step = 101;
@@ -50,6 +52,8 @@ class Hero {
   render() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
   }
+  // Added input, which allows hero to move when key is pressed.
+  // Also added boundaries for hero not to move outside gameboard
   handleInput(input) {
     switch(input) {
       case 'left':
@@ -74,6 +78,7 @@ class Hero {
         break;
     }
   }
+  // Added collision and function to reset hero after collission
   update() {
     for (let enemy of allEnemies) {
       if (this.y === enemy.y && (enemy.x + enemy.step/2 > this.x && enemy.x < this.x + this.step/2)) {
@@ -83,6 +88,7 @@ class Hero {
       this.victory = true;
     }
   }
+  // Added reset function which resets hero when colliding with enemy
   reset() {
     this.y = this.startY;
     this.x = this.startX;
@@ -92,14 +98,14 @@ class Hero {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-
 const player = new Hero();
 const bug1 = new Enemy(-101, 0, 250);
 const bug2 = new Enemy(-101, 83, 300);
-const bug3 = new Enemy((-101 * 2.5), 166, 450);
+const bug3 = new Enemy((-101 * 2.5), 166, 500);
 const bug4 = new Enemy((-101 * 2), 0, 150);
+const bug5 = new Enemy(-101, 166, 150)
 const allEnemies = [];
-allEnemies.push(bug1, bug2, bug3, bug4);
+allEnemies.push(bug1, bug2, bug3, bug4, bug5);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
