@@ -1,45 +1,92 @@
+*,
+*:after,
+*:before: {
+    box-sizing: inherit;
+}
+
+html {
+    box-sizing: border-box;
+}
+
 body {
-    text-align: center;
+    color: #111;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    margin: 0;
 }
-.modal-bg {
+
+a {
+    text-decoration: none;
+    color: #111;
+}
+
+a:hover h2 {
+    text-decoration: underline;
+}
+
+h1 {
+    display: inline-block;
+    font-weight: 100;
+    margin: 0 0 0 0.5em;
+}
+
+h2 {
+    font-weight: 400;
+    margin: 0;
+}
+
+.header {
+    background: #4caf50;
+    color: #fff;
     position: fixed;
+    top: 0;
     width: 100%;
+    padding: 0.5em 1em;
+}
+
+.icon-list {
+    font-size: 1.5em;
+    color: #FFF;
+}
+
+.slide-menu {
+    position: absolute;
+    top: 3.5em;
+    padding: 1em;
+    background: #4caf50;
     height: 100%;
-    background: #1d1d1d6b
+    width: 10em;
+    transform: translate3d(0, 0, 0);
+    transition: transform 0.2s;
 }
 
-.modal-body {
-  border: 1px solid black;
-  color: black;
-  font-size: 1.3em;
-  height: 40%;
-  width: 40%;
-  margin: 7% auto 0 auto;
-  background-color: white;
-  padding-top: 1%;
+.slide-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-.modal-title {
-    padding-top: 2rem;
+.slide-menu li {
+    padding: 0;
 }
 
-.playAgain {
-  margin: 5%;
-  border-radius: 5%;
-  border: 1px solid black;
-  padding: 2%;
-  background-color: blue;
-  color: white;
+.slide-menu li a {
+    color: #fff;
+    display: block;
+    padding: 0.5em 0;
 }
 
-.playAgain:hover {
-  background-color: blue;
-  color: white;
-  border: 1px solid white;
-  border-radius: 5%;
-  font-size: 0.7em;
+.menu-hidden .slide-menu {
+    transform: translate3d(-12em, 0, 0);
+    transition: transform 0.2s;
 }
 
-.hide {
-    display: none;
+.feed {
+    margin: 4em 0 0;
+}
+
+.entry {
+    border-bottom: 1px solid #ddd;
+    padding: 1em;
+    margin: 0.5em 0;
 }

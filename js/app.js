@@ -1,126 +1,133 @@
-// Enemies our player must avoid
-var Enemy = function(x, y, speed) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+/* app.js
+ *
+ * This is our RSS feed reader application. It uses the Google
+ * Feed Reader API to grab RSS feeds as JSON object we can make
+ * use of. It also uses the Handlebars templating library and
+ * jQuery.
+ */
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
-    // Offset enemy so that it appears in middle of tiles
-    // Added reset to enemy
-    this.x = x;
-    this.y = y + 55;
-    this.step = 101;
-    this.speed = speed;
-    this.boundary = this.step * 5;
-    this.resetPosition = -this.step;
-    this.sprite = 'images/enemy-bug.png';
-};
-
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
-Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-    if (this.x < this.boundary) {
-      this.x += this.speed * dt;
-    } else {
-      this.x = this.resetPosition;
+// The names and URLs to all of the feeds we'd like available.
+var allFeeds = [
+    {
+        name: 'Udacity Blog',
+        url: 'http://blog.udacity.com/feed'
+    }, {
+        name: 'CSS Tricks',
+        url: 'http://feeds.feedburner.com/CssTricks'
+    }, {
+        name: 'HTML5 Rocks',
+        url: 'http://feeds.feedburner.com/html5rocks'
+    }, {
+        name: 'Linear Digressions',
+        url: 'http://feeds.feedburner.com/udacity-linear-digressions'
     }
-};
+];
 
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-// Create hero so that he moves a tile at a time and he appears center of tile
-class Hero {
-  constructor () {
-    this.step = 101;
-    this.jump = 83;
-    this.startX = this.step * 2;
-    this.startY = (this.jump * 4) + 55;
-    this.x = this.startX;
-    this.y = this.startY;
-    this.sprite = 'images/char-princess-girl.png';
-    this.victory = false;
-  }
-  render() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-  }
-  // Added input, which allows hero to move when key is pressed.
-  // Also added boundaries for hero not to move outside gameboard
-  handleInput(input) {
-    switch(input) {
-      case 'left':
-        if (this.x > 0) {
-          this.x -= this.step;
-        }
-        break;
-      case 'up':
-        if (this.y > 5) {
-          this.y -= this.jump;
-        }
-        break;
-      case 'right':
-        if (this.x < this.step * 4) {
-          this.x += this.step;
-        }
-        break;
-      case 'down':
-        if (this.y < this.jump * 4) {
-          this.y += this.jump;
-        }
-        break;
-    }
-  }
-  // Added collision and function to reset hero after collission
-  update() {
-    for (let enemy of allEnemies) {
-      if (this.y === enemy.y &&
-        this.x < enemy.x + 83 &&
-        this.x + 83 > enemy.x &&
-        this.y < enemy.y + 101 &&
-        101 + this.y > enemy.y) {
-        this.reset();
-      }
-    } if (this.y < 0) {
-      this.victory = true;
-    }
-  }
-
-  // Added reset function which resets hero when colliding with enemy
-  reset() {
-    this.y = this.startY;
-    this.x = this.startX;
-  }
+/* This function starts up our application. The Google Feed
+ * Reader API is loaded asynchonously and will then call this
+ * function when the API is loaded.
+ */
+function init() {
+    // Load the first feed we've defined (index of 0).
+    loadFeed(0);
 }
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
-const player = new Hero();
-const bug1 = new Enemy(-101, 0, 250);
-const bug2 = new Enemy(-101, 83, 300);
-const bug3 = new Enemy((-101 * 2.5), 166, 500);
-const bug4 = new Enemy((-101 * 2), 0, 150);
-const bug5 = new Enemy(-101, 166, 150)
-const allEnemies = [];
-allEnemies.push(bug1, bug2, bug3, bug4, bug5);
+/* This function performs everything necessary to load a
+ * feed using the Google Feed Reader API. It will then
+ * perform all of the DOM operations required to display
+ * feed entries on the page. Feeds are referenced by their
+ * index position within the allFeeds array.
+ * This function all supports a callback as the second parameter
+ * which will be called after everything has run successfully.
+ */
+ function loadFeed(id, cb) {
+     var feedUrl = allFeeds[id].url,
+         feedName = allFeeds[id].name;
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
-    };
+     $.ajax({
+       type: "POST",
+       url: 'https://rsstojson.udacity.com/parseFeed',
+       data: JSON.stringify({url: feedUrl}),
+       contentType:"application/json",
+       success: function (result, status){
 
-    player.handleInput(allowedKeys[e.keyCode]);
-});
+                 var container = $('.feed'),
+                     title = $('.header-title'),
+                     entries = result.feed.entries,
+                     entriesLen = entries.length,
+                     entryTemplate = Handlebars.compile($('.tpl-entry').html());
+
+                 title.html(feedName);   // Set the header text
+                 container.empty();      // Empty out all previous entries
+
+                 /* Loop through the entries we just loaded via the Google
+                  * Feed Reader API. We'll then parse that entry against the
+                  * entryTemplate (created above using Handlebars) and append
+                  * the resulting HTML to the list of entries on the page.
+                  */
+                 entries.forEach(function(entry) {
+                     container.append(entryTemplate(entry));
+                 });
+
+                 if (cb) {
+                     cb();
+                 }
+               },
+       error: function (result, status, err){
+                 //run only the callback without attempting to parse result due to error
+                 if (cb) {
+                     cb();
+                 }
+               },
+       dataType: "json"
+     });
+ }
+
+/* Google API: Loads the Feed Reader API and defines what function
+ * to call when the Feed Reader API is done loading.
+ */
+google.setOnLoadCallback(init);
+
+/* All of this functionality is heavily reliant upon the DOM, so we
+ * place our code in the $() function to ensure it doesn't execute
+ * until the DOM is ready.
+ */
+$(function() {
+    var container = $('.feed'),
+        feedList = $('.feed-list'),
+        feedItemTemplate = Handlebars.compile($('.tpl-feed-list-item').html()),
+        feedId = 0,
+        menuIcon = $('.menu-icon-link');
+
+    /* Loop through all of our feeds, assigning an id property to
+     * each of the feeds based upon its index within the array.
+     * Then parse that feed against the feedItemTemplate (created
+     * above using Handlebars) and append it to the list of all
+     * available feeds within the menu.
+     */
+    allFeeds.forEach(function(feed) {
+        feed.id = feedId;
+        feedList.append(feedItemTemplate(feed));
+
+        feedId++;
+    });
+
+    /* When a link in our feedList is clicked on, we want to hide
+     * the menu, load the feed, and prevent the default action
+     * (following the link) from occurring.
+     */
+    feedList.on('click', 'a', function() {
+        var item = $(this);
+
+        $('body').addClass('menu-hidden');
+        loadFeed(item.data('id'));
+        return false;
+    });
+
+    /* When the menu icon is clicked on, we need to toggle a class
+     * on the body to perform the hiding/showing of our menu.
+     */
+    menuIcon.on('click', function() {
+        $('body').toggleClass('menu-hidden');
+    });
+}());
